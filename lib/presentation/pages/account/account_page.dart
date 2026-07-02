@@ -628,7 +628,7 @@ class _ToggleState extends State<_Toggle> {
                               );
                             }
                           } finally {
-                            if (context.mounted) {
+                            if (context.mounted && Navigator.canPop(context)) {
                               Navigator.pop(context);
                             }
                           }
