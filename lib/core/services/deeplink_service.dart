@@ -31,9 +31,17 @@ class DeeplinkPaymentData {
   factory DeeplinkPaymentData.fromUri(Uri uri) {
     final q = uri.queryParameters;
 
+    // Debug: log semua data URI yang diterima
+    debugPrint('[DeeplinkPaymentData] === RAW URI: $uri ===');
+    debugPrint('[DeeplinkPaymentData] scheme=${uri.scheme}, host=${uri.host}, path=${uri.path}');
+    debugPrint('[DeeplinkPaymentData] queryParameters=$q');
+    debugPrint('[DeeplinkPaymentData] query (raw)=${uri.query}');
+
     final merchantId   = q['merchant_id'];
     final merchantName = q['merchant_name'];
     final amountStr    = q['amount'];
+
+    debugPrint('[DeeplinkPaymentData] merchantId=$merchantId, merchantName=$merchantName, amountStr="$amountStr"');
 
     if (merchantId == null || merchantId.trim().isEmpty) {
       throw const FormatException('Link pembayaran tidak valid: merchant_id tidak ditemukan.');
@@ -45,9 +53,13 @@ class DeeplinkPaymentData {
       throw const FormatException('Link pembayaran tidak valid: amount tidak ditemukan.');
     }
 
-    final amount = double.tryParse(amountStr);
+    // Bersihkan amount dari karakter non-numerik (kecuali titik desimal)
+    final cleanedAmount = amountStr.trim().replaceAll(RegExp(r'[^0-9.]'), '');
+    debugPrint('[DeeplinkPaymentData] cleanedAmount="$cleanedAmount"');
+
+    final amount = double.tryParse(cleanedAmount);
     if (amount == null || amount <= 0) {
-      throw const FormatException('Link pembayaran tidak valid: amount harus berupa angka > 0.');
+      throw FormatException('Link pembayaran tidak valid: amount harus berupa angka > 0. (raw="$amountStr", cleaned="$cleanedAmount")');
     }
 
     return DeeplinkPaymentData(
