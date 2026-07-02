@@ -22,6 +22,7 @@ import '../../presentation/pages/payment/payment_qr_page.dart';
 import '../../presentation/pages/payment/pin_page.dart';
 import '../../presentation/pages/promo/promo_page.dart';
 import '../../presentation/pages/splash/splash_page.dart';
+import '../../presentation/pages/welcome/welcome_page.dart';
 import '../../presentation/pages/success/success_page.dart';
 import '../../presentation/pages/topup/topup_page.dart';
 import '../../presentation/pages/transfer/transfer_amount_page.dart';
@@ -41,6 +42,10 @@ class AppRouter {
           GoRoute(
             path: '/',
             builder: (_, __) => _withAuth(const SplashPage()),
+          ),
+          GoRoute(
+            path: '/welcome',
+            builder: (_, __) => const WelcomePage(),
           ),
           GoRoute(
             path: '/login',
@@ -159,6 +164,9 @@ class AppRouter {
                 lines: (extra['lines'] as List<dynamic>?)
                     ?.map((l) => (l as List<dynamic>).map((e) => e.toString()).toList())
                     .toList() ?? [],
+                callbackUrl: extra['callbackUrl'] as String?,
+                callbackReference: extra['callbackReference'] as String?,
+                transactionId: extra['transactionId'] as int?,
               ));
             },
           ),
