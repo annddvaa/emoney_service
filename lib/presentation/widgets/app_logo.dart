@@ -17,6 +17,22 @@ class AppLogo extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(size * 0.25),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.account_balance_wallet_rounded,
+            size: size * 0.6,
+            color: Colors.white,
+          ),
+        );
+      },
     );
 
     if (!withText) return icon;
@@ -31,7 +47,7 @@ class AppLogo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Dompet Kampus',
+              'Service Pay',
               style: TextStyle(
                 fontFamily: fontFamily,
                 fontSize: size * 0.3,
@@ -42,13 +58,13 @@ class AppLogo extends StatelessWidget {
               ),
             ),
             Text(
-              'GLOBAL',
+              'REPAIR & SERVICE',
               style: TextStyle(
                 fontFamily: fontFamily,
-                fontSize: size * 0.205,
+                fontSize: size * 0.16,
                 fontWeight: FontWeight.w700,
                 color: light ? Colors.white.withValues(alpha: 0.85) : AppColors.primary,
-                letterSpacing: 1.5,
+                letterSpacing: 1.2,
                 height: 1.05,
               ),
             ),
