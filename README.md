@@ -1,16 +1,10 @@
-# emoneyservice
+## Aplikasi Service Pay dan Aplikasi DavPhone Service 
 
-A new Flutter project.
+ * Nama: Dava Ananda Wahyudi
+ * NIM: 1123150164
+ * Kelas: TI23SE2P
+ * Dosen Pengampu: I Ketut Gunawan,S.Kom,M.T.I
+ * Mata Kuliah: Aplikasi Mobile Lanjutan
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+ Aplikasi ini di buat berdasarkan perintah yang di berikan oleh dosen pengampu mata kuliah aplikasi mobile lanjutan
+ 
