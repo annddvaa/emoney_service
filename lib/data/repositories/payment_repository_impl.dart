@@ -13,9 +13,13 @@ class PaymentRepositoryImpl implements PaymentRepository {
     try {
       return await _remote.topup(amount);
     } on ServerException catch (e) {
-      throw ServerFailure(e.message);
+      throw ServerFailure(e.message, errorCode: e.errorCode);
     } on NetworkException catch (e) {
       throw NetworkFailure(e.message);
+    } on UnauthorizedException catch (e) {
+      throw ServerFailure(e.message, errorCode: e.errorCode);
+    } catch (e) {
+      throw UnexpectedFailure(e.toString());
     }
   }
 
@@ -42,9 +46,13 @@ class PaymentRepositoryImpl implements PaymentRepository {
         message: e.message,
       );
     } on ServerException catch (e) {
-      throw ServerFailure(e.message);
+      throw ServerFailure(e.message, errorCode: e.errorCode);
     } on NetworkException catch (e) {
       throw NetworkFailure(e.message);
+    } on UnauthorizedException catch (e) {
+      throw ServerFailure(e.message, errorCode: e.errorCode);
+    } catch (e) {
+      throw UnexpectedFailure(e.toString());
     }
   }
 }
