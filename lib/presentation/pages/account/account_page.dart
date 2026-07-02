@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/services/biometric_service.dart';
+import '../../../data/datasources/local/secure_storage_datasource.dart';
+import '../../../injection/injection_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/app_avatar.dart';
@@ -120,20 +124,20 @@ class AccountPage extends StatelessWidget {
                             ),
                             const Divider(height: 1, indent: 56, color: AppColors.line2),
                             _Row(
-                              icon: Icons.lock_outline_rounded,
-                              tone: 'blue',
-                              title: 'Ubah PIN keamanan',
-                              subtitle: 'Terakhir diubah 2 bln lalu',
-                              onTap: () {},
-                            ),
+                               icon: Icons.lock_outline_rounded,
+                               tone: 'blue',
+                               title: 'Ubah PIN keamanan',
+                               subtitle: 'Terakhir diubah 2 bln lalu',
+                               onTap: () => _showChangePinDialog(context),
+                             ),
                             const Divider(height: 1, indent: 56, color: AppColors.line2),
                             _Row(
                               icon: Icons.fingerprint_rounded,
                               tone: 'violet',
-                              title: 'Login biometrik',
-                              subtitle: 'Sidik jari',
+                              title: 'Biometrik (Masuk & Bayar)',
+                              subtitle: 'Sidik jari untuk masuk & transaksi',
                               onTap: () {},
-                              right: _Toggle(),
+                              right: _Toggle(email: user?.email),
                             ),
                           ],
                         ),
@@ -194,7 +198,7 @@ class AccountPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       const Center(
-                        child: Text('Dompet Kampus Global · v1.0.0',
+                        child: Text('Service Pay · v1.0.0',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
@@ -208,6 +212,160 @@ class AccountPage extends StatelessWidget {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showChangePinDialog(BuildContext context) {
+    final currentPinController = TextEditingController();
+    final newPinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+    bool loading = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Text(
+                'Ubah PIN Keamanan',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.ink,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Ubah 6 digit PIN untuk transaksi dan pembayaran.',
+                      style: TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 13, color: AppColors.slate500),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: currentPinController,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      decoration: InputDecoration(
+                        hintText: 'PIN Sekarang (Default: 123456)',
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: newPinController,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      decoration: InputDecoration(
+                        hintText: 'PIN Baru',
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: confirmPinController,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      decoration: InputDecoration(
+                        hintText: 'Konfirmasi PIN Baru',
+                        counterText: '',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: loading ? null : () => Navigator.pop(context),
+                  child: const Text('Batal', style: TextStyle(color: AppColors.slate500)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(80, 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: loading
+                      ? null
+                      : () async {
+                          final currentPin = currentPinController.text.trim();
+                          final newPin = newPinController.text.trim();
+                          final confirmPin = confirmPinController.text.trim();
+
+                          if (currentPin.length != 6 || newPin.length != 6 || confirmPin.length != 6) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('PIN harus terdiri dari 6 digit.'),
+                                backgroundColor: AppColors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (newPin != confirmPin) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Konfirmasi PIN baru tidak cocok.'),
+                                backgroundColor: AppColors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() => loading = true);
+
+                          final storage = sl<SecureStorageDatasource>();
+                          final savedPin = await storage.getPin() ?? '123456';
+
+                          if (currentPin != savedPin) {
+                            setDialogState(() => loading = false);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('PIN sekarang salah.'),
+                                  backgroundColor: AppColors.red,
+                                ),
+                              );
+                            }
+                            return;
+                          }
+
+                          await storage.savePin(newPin);
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('PIN keamanan berhasil diubah!'),
+                                backgroundColor: AppColors.green,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        },
+                  child: loading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Simpan'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -274,16 +432,257 @@ class _Row extends StatelessWidget {
 }
 
 class _Toggle extends StatefulWidget {
+  final String? email;
+  const _Toggle({super.key, this.email});
+
   @override
   State<_Toggle> createState() => _ToggleState();
 }
 
 class _ToggleState extends State<_Toggle> {
-  bool _on = true;
+  bool _on = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    final enabled = await sl<SecureStorageDatasource>().getBiometricEnabled();
+    setState(() => _on = enabled);
+  }
+
+  Future<void> _showPasswordDialog(String email, bool isGoogle) async {
+    final pinController = TextEditingController();
+    final pwController = TextEditingController();
+    bool loading = false;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              title: const Text('Aktifkan Sidik Jari',
+                  style: TextStyle(fontFamily: 'PlusJakartaSans', fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isGoogle
+                        ? 'Masukkan PIN keamanan Anda untuk mengaktifkan biometrik pembayaran.'
+                        : 'Masukkan PIN keamanan dan Kata Sandi Akun Anda untuk mengaktifkan biometrik masuk & pembayaran.',
+                    style: const TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 13, color: AppColors.slate500),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: pinController,
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    maxLength: 6,
+                    decoration: InputDecoration(
+                      hintText: 'PIN Keamanan',
+                      counterText: '',
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  if (!isGoogle) ...[
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: pwController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Kata Sandi Akun',
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: loading ? null : () => Navigator.pop(context),
+                  child: const Text('Batal', style: TextStyle(color: AppColors.slate500)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(80, 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: loading
+                      ? null
+                      : () async {
+                          final pinInput = pinController.text.trim();
+                          final pwInput = pwController.text;
+                          if (pinInput.length != 6) return;
+                          if (!isGoogle && pwInput.isEmpty) return;
+
+                          setDialogState(() => loading = true);
+
+                          try {
+                            // 1. Cek Ketersediaan Biometrik
+                            final isAvailable = await BiometricService.isAvailable();
+                            if (!isAvailable) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Perangkat tidak mendukung biometrik atau belum didaftarkan.'),
+                                    backgroundColor: AppColors.red,
+                                  ),
+                                );
+                              }
+                              Navigator.pop(context);
+                              return;
+                            }
+
+                            // 2. Scan Sidik Jari
+                            final authenticated = await BiometricService.authenticate(
+                              isGoogle
+                                  ? 'Konfirmasi sidik jari untuk mengaktifkan biometrik pembayaran'
+                                  : 'Konfirmasi sidik jari untuk mengaktifkan biometrik masuk & pembayaran',
+                            );
+
+                            if (!authenticated) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Sidik jari tidak cocok.'),
+                                    backgroundColor: AppColors.red,
+                                  ),
+                                );
+                              }
+                              Navigator.pop(context);
+                              return;
+                            }
+
+                            // 3. Verifikasi PIN Keamanan
+                            final storage = sl<SecureStorageDatasource>();
+                            final savedPin = await storage.getPin() ?? '123456';
+
+                            if (pinInput != savedPin) {
+                              setDialogState(() => loading = false);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('PIN keamanan salah.'),
+                                    backgroundColor: AppColors.red,
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+
+                            // 4. Verifikasi Password dengan Firebase Auth & Simpan Kredensial (Hanya jika bukan Google)
+                            if (!isGoogle) {
+                              try {
+                                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                  email: email,
+                                  password: pwInput,
+                                );
+                                await storage.saveCredentials(email, pwInput);
+                              } on FirebaseAuthException catch (e) {
+                                setDialogState(() => loading = false);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Kata sandi salah: ${e.message}'),
+                                      backgroundColor: AppColors.red,
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+                            } else {
+                              // Akun Google: simpan email dan password kosong
+                              await storage.saveCredentials(email, '');
+                            }
+
+                            // Aktifkan biometrik masuk & pembayaran
+                            await storage.saveBiometricEnabled(true);
+                            setState(() => _on = true);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(isGoogle
+                                      ? 'Biometrik pembayaran berhasil diaktifkan!'
+                                      : 'Biometrik masuk & pembayaran berhasil diaktifkan!'),
+                                  backgroundColor: AppColors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Gagal mengaktifkan biometrik: $e'),
+                                  backgroundColor: AppColors.red,
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                  child: loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white)),
+                        )
+                      : const Text('Konfirmasi'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => setState(() => _on = !_on),
+      onTap: () async {
+        if (_on) {
+          // Matikan biometrik
+          final storage = sl<SecureStorageDatasource>();
+          await storage.saveBiometricEnabled(false);
+          await storage.deleteCredentials();
+          setState(() => _on = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Biometrik masuk & pembayaran dinonaktifkan.'),
+                backgroundColor: AppColors.slate600,
+              ),
+            );
+          }
+        } else {
+          // Aktifkan biometrik
+          final user = FirebaseAuth.instance.currentUser;
+          final isGoogle = user?.providerData.any((p) => p.providerId == 'google.com') ?? false;
+          if (widget.email == null || widget.email!.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Email user tidak ditemukan.'),
+                backgroundColor: AppColors.red,
+              ),
+            );
+            return;
+          }
+          await _showPasswordDialog(widget.email!, isGoogle);
+        }
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         width: 44,
