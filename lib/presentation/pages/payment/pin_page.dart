@@ -85,22 +85,6 @@ class _PinPageState extends State<PinPage> {
   Future<void> _onPinComplete(String pin) async {
     final kind = widget.flowData['kind'] as String? ?? '';
 
-    // Flow deeplink: PIN dummy — angka apapun diterima, skip OTP/2FA.
-    if (kind == 'deeplink') {
-      setState(() {
-        _pin = pin;
-        _busy = true;
-      });
-      final flow = widget.flowData;
-      context.read<PaymentBloc>().add(PaymentTransferRequested(
-        amount: (flow['amount'] as num).toDouble(),
-        description: _descriptionFor(flow),
-        otpCode: 'deeplink_dummy',
-        otpType: 'deeplink',
-      ));
-      return;
-    }
-
     // Flow normal: validasi PIN yang tersimpan.
     final savedPin = await sl<SecureStorageDatasource>().getPin() ?? '123456';
     if (pin != savedPin) {
@@ -313,16 +297,62 @@ class _PinPageState extends State<PinPage> {
           },
         ),
       ],
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
-            children: [
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (didPop) return;
+
+          if (_step == _Step.otp && !_busy) {
+            _countdown?.cancel();
+            setState(() {
+              _step = _Step.pin;
+              _pin = '';
+              _otpCode = '';
+            });
+          } else {
+            // Tampilkan dialog konfirmasi sebelum membatalkan pembayaran
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Batalkan Pembayaran?', style: TextStyle(fontFamily: 'PlusJakartaSans', fontWeight: FontWeight.bold)),
+                content: const Text('Apakah kamu yakin ingin membatalkan pembayaran ini?', style: TextStyle(fontFamily: 'PlusJakartaSans')),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Tidak', style: TextStyle(color: AppColors.slate600, fontWeight: FontWeight.bold)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Ya, Batalkan', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true) {
+              // Kirim callback cancelled jika user membatalkan dari flow deeplink.
+              final cb = _callbackUrl;
+              if (cb != null) {
+                DeeplinkCallbackService.notifyCancelled(
+                  callbackUrl: cb,
+                  reference: _callbackReference,
+                );
+              }
+              if (context.mounted) context.go('/home');
+            }
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: Column(
+              children: [
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
                   icon: const Icon(Icons.close_rounded, color: AppColors.ink),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_step == _Step.otp && !_busy) {
                       _countdown?.cancel();
                       setState(() {
@@ -331,15 +361,37 @@ class _PinPageState extends State<PinPage> {
                         _otpCode = '';
                       });
                     } else {
-                      // Kirim callback cancelled jika user membatalkan dari flow deeplink.
-                      final cb = _callbackUrl;
-                      if (cb != null) {
-                        DeeplinkCallbackService.notifyCancelled(
-                          callbackUrl: cb,
-                          reference: _callbackReference,
-                        );
+                      // Tampilkan dialog konfirmasi sebelum membatalkan pembayaran
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Batalkan Pembayaran?', style: TextStyle(fontFamily: 'PlusJakartaSans', fontWeight: FontWeight.bold)),
+                          content: const Text('Apakah kamu yakin ingin membatalkan pembayaran ini?', style: TextStyle(fontFamily: 'PlusJakartaSans')),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Tidak', style: TextStyle(color: AppColors.slate600, fontWeight: FontWeight.bold)),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Ya, Batalkan', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        // Kirim callback cancelled jika user membatalkan dari flow deeplink.
+                        final cb = _callbackUrl;
+                        if (cb != null) {
+                          DeeplinkCallbackService.notifyCancelled(
+                            callbackUrl: cb,
+                            reference: _callbackReference,
+                          );
+                        }
+                        if (context.mounted) context.go('/home');
                       }
-                      context.go('/home');
                     }
                   },
                 ),
@@ -370,7 +422,7 @@ class _PinPageState extends State<PinPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildPinStep() {
