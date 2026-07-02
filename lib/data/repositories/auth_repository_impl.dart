@@ -19,6 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
       await _local.saveToken(result.token);
       await _local.saveUserJson(result.user.toJsonString());
       await _local.saveAuthVerified(false);
+      final fcmToken = await _local.getFcmToken();
+      if (fcmToken != null) {
+        await _remote.updateFcmToken(fcmToken).catchError((_) {});
+      }
       return (user: result.user, token: result.token);
     } on UnauthorizedException catch (e) {
       throw AuthFailure(e.message, errorCode: e.errorCode);
@@ -36,6 +40,10 @@ class AuthRepositoryImpl implements AuthRepository {
       await _local.saveToken(result.token);
       await _local.saveUserJson(result.user.toJsonString());
       await _local.saveAuthVerified(false);
+      final fcmToken = await _local.getFcmToken();
+      if (fcmToken != null) {
+        await _remote.updateFcmToken(fcmToken).catchError((_) {});
+      }
       return (user: result.user, token: result.token);
     } on UnauthorizedException catch (e) {
       throw AuthFailure(e.message, errorCode: e.errorCode);
@@ -71,6 +79,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> updateFcmToken(String fcmToken) async {
     try {
+      await _local.saveFcmToken(fcmToken);
       await _remote.updateFcmToken(fcmToken);
     } catch (_) {
       // Non-critical, silently ignore
@@ -79,7 +88,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() async {
-    await _local.clearAll();
+    await _local.deleteSession();
     _remote.clearAuthToken();
   }
 
@@ -95,7 +104,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> restoreApiToken() async {
     final token = await _local.getToken();
-    if (token != null) _remote.setAuthToken(token);
+    if (token != null) {
+      _remote.setAuthToken(token);
+      final fcmToken = await _local.getFcmToken();
+      if (fcmToken != null) {
+        await _remote.updateFcmToken(fcmToken).catchError((_) {});
+      }
+    }
   }
 
   @override
