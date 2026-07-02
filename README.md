@@ -22,30 +22,225 @@ Kedua aplikasi dikembangkan menggunakan bahasa pemrograman Dart dengan framework
 
 ### 1. Service Pay (`emoneyservice`)
 ```text
-lib/
-├── core/           # Utilitas inti, konfigurasi routing, tema (colors, typography), constant, error handling, services
-├── data/           # Layer Data: Models, Repositories Implementation, Data Sources (Remote API, Local Storage)
-├── domain/         # Layer Domain: Entities, Repositories Interface, Usecases
-├── injection/      # Konfigurasi Dependency Injection (GetIt)
-├── presentation/   # Layer Presentasi: Pages (UI), Widgets, BLoC (State Management)
-├── main.dart       # Entry point aplikasi utama
-└── firebase_options.dart # Konfigurasi integrasi Firebase
+lib
+|   firebase_options.dart
+|   main.dart
+|   
++---core
+|   +---constants
+|   |       api_endpoints.dart
+|   |       app_constants.dart
+|   +---error
+|   |       exceptions.dart
+|   |       failures.dart
+|   +---network
+|   |       api_client.dart
+|   +---router
+|   |       app_router.dart
+|   +---services
+|   |       biometric_service.dart
+|   |       deeplink_callback_service.dart
+|   |       deeplink_service.dart
+|   |       notification_service.dart
+|   +---theme
+|   |       app_colors.dart
+|   |       app_text_styles.dart
+|   |       app_theme.dart
+|   \---utils
+|           app_bloc_observer.dart
+|           currency_formatter.dart
+|           date_formatter.dart
++---data
+|   +---datasources
+|   |   +---local
+|   |   |       secure_storage_datasource.dart
+|   |   \---remote
+|   |           account_remote_datasource.dart
+|   |           auth_remote_datasource.dart
+|   |           otp_remote_datasource.dart
+|   |           payment_remote_datasource.dart
+|   +---models
+|   |       account_model.dart
+|   |       transaction_model.dart
+|   |       user_model.dart
+|   \---repositories
+|           account_repository_impl.dart
+|           auth_repository_impl.dart
+|           otp_repository_impl.dart
+|           payment_repository_impl.dart
++---domain
+|   +---entities
+|   |       account_entity.dart
+|   |       otp_entity.dart
+|   |       payment_result_entity.dart
+|   |       transaction_entity.dart
+|   |       user_entity.dart
+|   +---repositories
+|   |       account_repository.dart
+|   |       auth_repository.dart
+|   |       otp_repository.dart
+|   |       payment_repository.dart
+|   \---usecases
+|       +---account
+|       |       get_account_usecase.dart
+|       +---auth
+|       |       get_me_usecase.dart
+|       |       logout_usecase.dart
+|       |       register_with_otp_usecase.dart
+|       |       send_otp_usecase.dart
+|       |       verify_email_otp_usecase.dart
+|       |       verify_firebase_token_usecase.dart
+|       \---payment
+|               payment_usecases.dart
++---injection
+|       injection_container.dart
+\---presentation
+    +---blocs
+    |   +---account
+    |   |       account_bloc.dart
+    |   +---auth
+    |   |       auth_bloc.dart
+    |   |       otp_bloc.dart
+    |   +---home
+    |   \---payment
+    |           payment_bloc.dart
+    +---pages
+    |   +---account
+    |   |       account_page.dart
+    |   +---auth
+    |   |       login_page.dart
+    |   |       register_page.dart
+    |   |       setup_2fa_page.dart
+    |   |       twofa_notif_page.dart
+    |   |       twofa_smtp_page.dart
+    |   |       twofa_totp_page.dart
+    |   |       verify_email_page.dart
+    |   +---history
+    |   |       history_page.dart
+    |   +---home
+    |   |       home_page.dart
+    |   +---merchant
+    |   |       merchant_checkout_page.dart
+    |   +---payment
+    |   |       payment_deeplink_page.dart
+    |   |       payment_qr_page.dart
+    |   |       pin_page.dart
+    |   +---promo
+    |   |       promo_page.dart
+    |   +---splash
+    |   |       splash_page.dart
+    |   +---success
+    |   |       success_page.dart
+    |   +---topup
+    |   |       topup_page.dart
+    |   +---transfer
+    |   |       transfer_amount_page.dart
+    |   |       transfer_confirm_page.dart
+    |   |       transfer_page.dart
+    |   \---welcome
+    |           welcome_page.dart
+    \---widgets
+            app_avatar.dart
+            app_badge.dart
+            app_button.dart
+            app_field.dart
+            app_logo.dart
+            app_tab_bar.dart
+            app_top_bar.dart
+            code_input.dart
+            feature_icon.dart
+            num_pad.dart
+            pin_pad.dart
+            success_check.dart
+            transaction_row.dart
 ```
 
 ### 2. DavPhone Service (`service_store`)
 ```text
-lib/
-├── core/           # Konfigurasi utama aplikasi, routing, tema, utility, formatters
-├── features/       # Berisi modul-modul fitur aplikasi
-│   ├── auth/       # Fitur Autentikasi (Login, Register)
-│   ├── cart/       # Fitur Keranjang Belanja/Service
-│   ├── dashboard/  # Tampilan Utama (Beranda, Menu, Splash)
-│   ├── history/    # Riwayat Transaksi/Layanan
-│   ├── merchant/   # Fitur Toko / Merchant
-│   ├── profile/    # Pengaturan Profil Pengguna
-│   └── service/    # Modul pemesanan layanan (Service HP)
-├── main.dart       # Entry point aplikasi utama
-└── firebase_options.dart
+lib
+|   firebase_options.dart
+|   main.dart
+|   
++---core
+|   +---constants
+|   |       api_constants.dart
+|   |       app_color.dart
+|   |       app_strings.dart
+|   +---providers
+|   |       theme_provider.dart
+|   +---routes
+|   |       app_router.dart
+|   +---services
+|   |       deeplink_handler.dart
+|   |       dio_client.dart
+|   |       secure_storage.dart
+|   \---theme
+|           app_theme.dart
+\---features
+    +---auth
+    |   +---data
+    |   |   +---models
+    |   |   |       auth_response_model.dart
+    |   |   \---repositories
+    |   |           auth_repository_impl.dart
+    |   +---domain
+    |   |   \---repositories
+    |   |           auth_repository.dart
+    |   \---presentation
+    |       +---pages
+    |       |       login_page.dart
+    |       |       register_page.dart
+    |       |       verify_email_page.dart
+    |       +---providers
+    |       |       auth_provider.dart
+    |       \---widgets
+    |               auth_header.dart
+    |               custom_button.dart
+    |               custom_text_field.dart
+    |               divider_with_text.dart
+    |               google_sign_in_button.dart
+    |               loading_overlay.dart
+    +---cart
+    |   +---data
+    |   |   \---models
+    |   |           cart_model.dart
+    |   \---presentation
+    |       +---pages
+    |       |       cart.dart
+    |       \---providers
+    |               cart_provider.dart
+    +---checkout
+    |   \---pages
+    |           checkout.dart
+    +---dashboard
+    |   +---data
+    |   |   +---models
+    |   |   |       product_model.dart
+    |   |   \---repositories
+    |   |           product_repository_impl.dart
+    |   +---domain
+    |   |   \---repositories
+    |   |           product_repository.dart
+    |   \---presentation
+    |       +---pages
+    |       |       dashboard_page.dart
+    |       |       product_detail_page.dart
+    |       |       splash_page.dart
+    |       \---providers
+    |               product_provider.dart
+    +---orders
+    |   +---data
+    |   |   \---models
+    |   |           order_model.dart
+    |   \---presentation
+    |       +---pages
+    |       |       orders_page.dart
+    |       \---providers
+    |               order_provider.dart
+    \---profile
+        \---presentation
+            \---pages
+                    profile_page.dart
 ```
 
 ## Flow Integrasi Kedua Aplikasi
