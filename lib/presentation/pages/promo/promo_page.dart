@@ -9,10 +9,10 @@ class PromoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final promos = [
-      {'t': 'Cashback 30% di Kantin Kampus', 'd': 'Maks. Rp10.000 · s.d. 30 Jun', 'tone': 'red', 'icon': Icons.restaurant_outlined},
-      {'t': 'Gratis biaya transfer antarbank', 'd': 'Setiap Jumat · semua bank', 'tone': 'green', 'icon': Icons.send_rounded},
-      {'t': 'Diskon UKT 0% cicilan 6 bulan', 'd': 'Khusus pengguna baru', 'tone': 'violet', 'icon': Icons.receipt_long_outlined},
-      {'t': 'Bonus 5.000 poin top up pertama', 'd': 'Min. Rp50.000', 'tone': 'amber', 'icon': Icons.star_outline_rounded},
+      {'t': 'Diskon Rp30.000 Jasa Servis', 'd': 'Khusus perbaikan LCD & Baterai · s.d. 31 Jul', 'tone': 'blue', 'icon': Icons.construction_rounded},
+      {'t': 'Gratis Diagnosa & Cek Kerusakan', 'd': 'Setiap hari Rabu di Service Center rekanan', 'tone': 'green', 'icon': Icons.troubleshoot_rounded},
+      {'t': 'Cicilan 0% Pembelian Sparepart', 'd': 'Cicilan hingga 12 bulan khusus kartu kredit rekanan', 'tone': 'violet', 'icon': Icons.credit_card_rounded},
+      {'t': 'Bonus 10.000 Poin Service Pay', 'd': 'Minimal transaksi pembayaran servis Rp150.000', 'tone': 'amber', 'icon': Icons.star_outline_rounded},
     ];
 
     return Scaffold(
@@ -66,9 +66,9 @@ class PromoPage extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          AppBadge(label: 'SPESIAL MAHASISWA', tone: 'amber'),
+                          AppBadge(label: 'SPESIAL SERVIS', tone: 'amber'),
                           SizedBox(height: 12),
-                          Text('Bayar kuliah,\ndapat cashback 💸',
+                          Text('Servis Handphone,\ndapat cashback 📱',
                               style: TextStyle(
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 22,
@@ -77,7 +77,7 @@ class PromoPage extends StatelessWidget {
                                 height: 1.2,
                               )),
                           SizedBox(height: 8),
-                          Text('Kumpulkan poin tiap transaksi.',
+                          Text('Kumpulkan poin tiap pembayaran perbaikan.',
                               style: TextStyle(
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 13.5,
