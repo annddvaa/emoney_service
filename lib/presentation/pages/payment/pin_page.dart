@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/services/biometric_service.dart';
 import '../../../core/services/deeplink_callback_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -30,6 +31,7 @@ class _PinPageState extends State<PinPage> {
   String _otpCode = '';
   bool _busy = false;
   bool _otpError = false;
+  bool _biometricEnabled = false;
 
   // 2FA method aktif ('smtp' | 'totp' | 'notif'), default ke TOTP.
   String _twoFaMethod = AppConstants.twoFaTotp;
@@ -38,19 +40,90 @@ class _PinPageState extends State<PinPage> {
   Timer? _countdown;
 
   @override
+  void initState() {
+    super.initState();
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    final enabled = await sl<SecureStorageDatasource>().getBiometricEnabled();
+    final available = await BiometricService.isAvailable();
+    if (mounted) {
+      setState(() {
+        _biometricEnabled = enabled && available;
+      });
+    }
+  }
+
+  Future<void> _onBioTap() async {
+    if (!_biometricEnabled) return;
+
+    final authenticated = await BiometricService.authenticate(
+      'Konfirmasi pembayaran dengan sidik jari'
+    );
+
+    if (authenticated) {
+      if (!mounted) return;
+      setState(() => _busy = true);
+      final flow = widget.flowData;
+      context.read<PaymentBloc>().add(PaymentTransferRequested(
+        amount: (flow['amount'] as num).toDouble(),
+        description: _descriptionFor(flow),
+        otpCode: 'biometric_success',
+        otpType: 'biometric',
+      ));
+    }
+  }
+
+  @override
   void dispose() {
     _countdown?.cancel();
     super.dispose();
   }
 
   // Step 1: PIN selesai diketik → tentukan apakah perlu OTP/2FA atau langsung diproses.
-  void _onPinComplete(String pin) {
+  Future<void> _onPinComplete(String pin) async {
+    final kind = widget.flowData['kind'] as String? ?? '';
+
+    // Flow deeplink: PIN dummy — angka apapun diterima, skip OTP/2FA.
+    if (kind == 'deeplink') {
+      setState(() {
+        _pin = pin;
+        _busy = true;
+      });
+      final flow = widget.flowData;
+      context.read<PaymentBloc>().add(PaymentTransferRequested(
+        amount: (flow['amount'] as num).toDouble(),
+        description: _descriptionFor(flow),
+        otpCode: 'deeplink_dummy',
+        otpType: 'deeplink',
+      ));
+      return;
+    }
+
+    // Flow normal: validasi PIN yang tersimpan.
+    final savedPin = await sl<SecureStorageDatasource>().getPin() ?? '123456';
+    if (pin != savedPin) {
+      setState(() {
+        _pin = '';
+        _busy = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PIN keamanan salah.'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
+      return;
+    }
+
     setState(() {
       _pin = pin;
       _busy = true;
     });
 
-    final kind = widget.flowData['kind'] as String? ?? '';
     if (kind == AppConstants.txnTopup) {
       context.read<PaymentBloc>().add(PaymentTopupRequested(
         (widget.flowData['amount'] as num).toDouble(),
@@ -162,23 +235,19 @@ class _PinPageState extends State<PinPage> {
           listener: (context, state) {
             if (state is PaymentTransferSuccess) {
               final result = state.result;
-              // Kirim callback sukses ke app merchant (fire-and-forget, best-effort).
               final cb = _callbackUrl;
-              if (cb != null) {
-                DeeplinkCallbackService.notifySuccess(
-                  callbackUrl: cb,
-                  reference: _callbackReference,
-                  transactionId: result.transactionId,
-                );
-              }
+              
               context.go('/success', extra: {
                 'title': 'Pembayaran berhasil',
                 'subtitle': result.description,
                 'amount': result.amount,
+                'callbackUrl': cb,
+                'callbackReference': _callbackReference,
+                'transactionId': result.transactionId,
                 'lines': [
                   ['Jumlah', CurrencyFormatter.format(result.amount)],
                   ['Saldo setelah', CurrencyFormatter.format(result.balanceAfter)],
-                  ['Ref', 'DKG${result.transactionId}'],
+                  ['Ref', 'SP${result.transactionId}'],
                 ],
               });
             } else if (state is PaymentTopupSuccess) {
@@ -335,6 +404,7 @@ class _PinPageState extends State<PinPage> {
             value: _pin,
             onChanged: (v) => setState(() => _pin = v),
             onComplete: _onPinComplete,
+            onBioTap: _biometricEnabled ? _onBioTap : null,
           ),
           const SizedBox(height: 18),
           const Text.rich(TextSpan(
