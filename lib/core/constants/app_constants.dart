@@ -1,10 +1,9 @@
 class AppConstants {
-  static const String appName = 'Dompet Kampus Global';
+  static const String appName = 'Service Pay';
   static const String appVersion = '1.0.0';
 
-  // API
   static const String baseUrl =
-      'http://192.168.43.61:8080'; // Android emulator → localhost
+      'http://192.168.100.221:8081';
   static const String apiVersion = '/v1';
   static const int connectTimeout = 30;
   static const int receiveTimeout = 30;
@@ -15,6 +14,10 @@ class AppConstants {
   static const String k2faMethod = 'twofa_method';
   static const String kFcmToken = 'fcm_token';
   static const String kAuthVerified = 'auth_verified';
+  static const String kBiometricEnabled = 'biometric_enabled';
+  static const String kBiometricEmail = 'biometric_email';
+  static const String kBiometricPassword = 'biometric_password';
+  static const String kUserPin = 'user_pin';
 
   // 2FA Method identifiers
   static const String twoFaSmtp = 'smtp';
