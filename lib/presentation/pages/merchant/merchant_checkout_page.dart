@@ -4,9 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_logo.dart';
-import '../../widgets/feature_icon.dart';
 
-const _orange = Color(0xFFFF6A2B);
+const _themeColor = Color(0xFF0EA5E9);
 
 class MerchantCheckoutPage extends StatelessWidget {
   const MerchantCheckoutPage({super.key});
@@ -14,10 +13,11 @@ class MerchantCheckoutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      {'name': 'Kemeja Flanel Oversize', 'qty': 1, 'price': 159000.0},
-      {'name': 'Tumbler Stainless 750ml', 'qty': 2, 'price': 45000.0},
+      {'name': 'LCD Screen iPhone 11 Original', 'qty': 1, 'price': 450000.0},
+      {'name': 'Baterai Original iPhone 11', 'qty': 1, 'price': 250000.0},
+      {'name': 'Jasa Service & Pemasangan', 'qty': 1, 'price': 100000.0},
     ];
-    const ship = 12000.0;
+    const ship = 15000.0;
     final subtotal = items.fold(0.0, (s, i) => s + (i['price'] as double) * (i['qty'] as int));
     final total = subtotal + ship;
 
@@ -25,9 +25,9 @@ class MerchantCheckoutPage extends StatelessWidget {
       backgroundColor: AppColors.bg,
       body: Column(
         children: [
-          // TokoBelanja header (different brand!)
+          // FixPhone Service Center header
           Container(
-            color: _orange,
+            color: _themeColor,
             padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 6, 16, 14),
             child: Row(
               children: [
@@ -52,9 +52,9 @@ class MerchantCheckoutPage extends StatelessWidget {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.storefront_outlined, size: 14, color: Colors.white),
+                      Icon(Icons.build_rounded, size: 14, color: Colors.white),
                       SizedBox(width: 6),
-                      Text('TokoBelanja',
+                      Text('FixPhone Service',
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 12,
@@ -85,7 +85,7 @@ class MerchantCheckoutPage extends StatelessWidget {
                       children: [
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Text('Pesanan #TB-2026-88142',
+                          child: Text('Pesanan #SVC-2026-88142',
                               style: TextStyle(
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 12.5,
@@ -107,10 +107,10 @@ class MerchantCheckoutPage extends StatelessWidget {
                                       width: 46,
                                       height: 46,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFFFF1E9),
+                                        color: const Color(0xFFE0F2FE),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: const Center(child: Icon(Icons.shopping_bag_outlined, size: 22, color: _orange)),
+                                      child: const Center(child: Icon(Icons.build_rounded, size: 20, color: _themeColor)),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
@@ -181,7 +181,7 @@ class MerchantCheckoutPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Dompet Kampus Global',
+                              Text('Service Pay',
                                   style: TextStyle(
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 14.5,
@@ -224,12 +224,12 @@ class MerchantCheckoutPage extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.slate600,
                                   )),
-                              Text(CurrencyFormatter.format(total),
+                               Text(CurrencyFormatter.format(total),
                                   style: const TextStyle(
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 15.5,
                                     fontWeight: FontWeight.w800,
-                                    color: _orange,
+                                    color: _themeColor,
                                   )),
                             ],
                           ),
@@ -249,7 +249,7 @@ class MerchantCheckoutPage extends StatelessWidget {
               label: 'Bayar ${CurrencyFormatter.format(total)}',
               onPressed: () => context.go('/pin', extra: {
                 'kind': 'deeplink',
-                'description': 'TokoBelanja #TB-2026-88142',
+                'description': 'FixPhone Service #SVC-2026-88142',
                 'amount': total,
               }),
             ),
