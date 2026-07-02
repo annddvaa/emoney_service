@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Blue
-  static const Color primary = Color(0xFF0B63E5);
-  static const Color primaryLight = Color(0xFF2C8BFF);
-  static const Color primaryDark = Color(0xFF0A4FBF);
-  static const Color primarySurface = Color(0xFFE8F1FD);
-  static const Color primaryBorder = Color(0xFFB8D0F7);
+  // Primary Cyber Blue/Cyan
+  static const Color primary = Color(0xFF0EA5E9);
+  static const Color primaryLight = Color(0xFF38BDF8);
+  static const Color primaryDark = Color(0xFF0369A1);
+  static const Color primarySurface = Color(0xFFF0F9FF);
+  static const Color primaryBorder = Color(0xFFBAE6FD);
 
   // Semantic
-  static const Color green = Color(0xFF16A571);
-  static const Color greenSurface = Color(0xFFE8F8F2);
-  static const Color amber = Color(0xFFD98512);
-  static const Color amberSurface = Color(0xFFFDF3E3);
-  static const Color red = Color(0xFFE5484D);
-  static const Color redSurface = Color(0xFFFDECED);
-  static const Color violet = Color(0xFF7A5AF8);
-  static const Color violetSurface = Color(0xFFF0EEFF);
+  static const Color green = Color(0xFF10B981);
+  static const Color greenSurface = Color(0xFFECFDF5);
+  static const Color amber = Color(0xFFF59E0B);
+  static const Color amberSurface = Color(0xFFFEF3C7);
+  static const Color red = Color(0xFFEF4444);
+  static const Color redSurface = Color(0xFFFEF2F2);
+  static const Color violet = Color(0xFF6366F1);
+  static const Color violetSurface = Color(0xFFEEF2FF);
 
   // Neutral
   static const Color ink = Color(0xFF0E1726);
@@ -56,7 +56,7 @@ class AppColors {
   ];
   static List<BoxShadow> shadowPrimary = [
     BoxShadow(
-      color: Color(0x520B63E5),
+      color: Color(0x520EA5E9),
       blurRadius: 22,
       spreadRadius: 0,
       offset: Offset(0, 10),
