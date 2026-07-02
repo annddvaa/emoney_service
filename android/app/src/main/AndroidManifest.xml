@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
-        android:label="emoneyservice"
+        android:label="Service Pay"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -57,6 +60,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Agar url_launcher bisa mengirim callback ke service_store -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="servicestore"/>
         </intent>
     </queries>
 </manifest>
