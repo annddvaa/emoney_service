@@ -19,16 +19,37 @@ class PaymentDeeplinkPage extends StatelessWidget {
   final Object? data;
   const PaymentDeeplinkPage({super.key, this.data});
 
-  void _cancel(BuildContext context, DeeplinkPaymentData payload) {
-    // Kirim callback cancelled ke app merchant sebelum kembali ke home.
-    final cb = payload.callbackUrl;
-    if (cb != null && cb.isNotEmpty) {
-      DeeplinkCallbackService.notifyCancelled(
-        callbackUrl: cb,
-        reference: payload.reference,
-      );
+  Future<void> _cancel(BuildContext context, DeeplinkPaymentData payload) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Batalkan Pembayaran?', style: TextStyle(fontFamily: 'PlusJakartaSans', fontWeight: FontWeight.bold)),
+        content: const Text('Apakah kamu yakin ingin membatalkan pembayaran ini?', style: TextStyle(fontFamily: 'PlusJakartaSans')),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Tidak', style: TextStyle(color: AppColors.slate600, fontWeight: FontWeight.bold)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ya, Batalkan', style: TextStyle(color: AppColors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      // Kirim callback cancelled ke app merchant sebelum kembali ke home.
+      final cb = payload.callbackUrl;
+      if (cb != null && cb.isNotEmpty) {
+        DeeplinkCallbackService.notifyCancelled(
+          callbackUrl: cb,
+          reference: payload.reference,
+        );
+      }
+      if (context.mounted) context.go('/home');
     }
-    context.go('/home');
   }
 
   @override
