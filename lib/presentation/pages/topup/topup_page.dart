@@ -45,11 +45,17 @@ class _TopUpPageState extends State<TopUpPage> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.bg,
-        appBar: AppTopBar(title: 'Isi Saldo', onBack: () => context.go('/home')),
-        body: Column(
-          children: [
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          context.go('/home');
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppTopBar(title: 'Isi Saldo', onBack: () => context.go('/home')),
+          body: Column(
+            children: [
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -195,6 +201,7 @@ class _TopUpPageState extends State<TopUpPage> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
