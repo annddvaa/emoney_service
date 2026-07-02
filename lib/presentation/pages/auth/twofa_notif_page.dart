@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/otp_bloc.dart';
 import '../../widgets/feature_icon.dart';
 
@@ -15,11 +17,43 @@ class TwoFANotifPage extends StatefulWidget {
 
 class _TwoFANotifPageState extends State<TwoFANotifPage> {
   String _phase = 'waiting'; // waiting, approved
+  StreamSubscription<RemoteMessage>? _onMessageSub;
+  StreamSubscription<RemoteMessage>? _onMessageOpenedAppSub;
 
   @override
   void initState() {
     super.initState();
     context.read<OtpBloc>().add(OtpSendFirebase());
+
+    // 1. Listen for foreground notifications
+    _onMessageSub = FirebaseMessaging.onMessage.listen(_handleIncomingMessage);
+
+    // 2. Listen for background notifications being tapped
+    _onMessageOpenedAppSub = FirebaseMessaging.onMessageOpenedApp.listen(_handleIncomingMessage);
+
+    // 3. Handle if app was launched from a terminated state via a notification
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        _handleIncomingMessage(message);
+      }
+    });
+  }
+
+  void _handleIncomingMessage(RemoteMessage message) {
+    if (!mounted) return;
+    debugPrint('[TwoFANotifPage] Received message: ${message.data}');
+    final otpCode = message.data['otp_code'];
+    if (otpCode != null) {
+      debugPrint('[TwoFANotifPage] Found OTP code: $otpCode. Confirming...');
+      context.read<OtpBloc>().add(OtpConfirm(code: otpCode, otpType: 'firebase'));
+    }
+  }
+
+  @override
+  void dispose() {
+    _onMessageSub?.cancel();
+    _onMessageOpenedAppSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -28,8 +62,15 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
       listener: (context, state) {
         if (state is OtpVerified) {
           setState(() => _phase = 'approved');
+          final authBloc = context.read<AuthBloc>();
+          final router = GoRouter.of(context);
           Future.delayed(const Duration(milliseconds: 900), () {
-            if (mounted) context.go('/home');
+            if (mounted) {
+              if (widget.mode != 'setup') {
+                authBloc.add(AuthCheckRequested());
+              }
+              router.go('/home');
+            }
           });
         } else if (state is OtpError) {
           ScaffoldMessenger.of(context).showSnackBar(
