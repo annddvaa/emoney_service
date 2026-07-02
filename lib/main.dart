@@ -77,7 +77,11 @@ class _DompetKampusAppState extends State<DompetKampusApp> with WidgetsBindingOb
   Future<void> _checkLockOnStart() async {
     // Hindari pemanggilan platform channel (BiometricService.isAvailable()) saat startup
     // karena bisa menyebabkan crash (native exception) pada beberapa device Android.
-    final enabled = await di.sl<SecureStorageDatasource>().getBiometricEnabled();
+    final secureStorage = di.sl<SecureStorageDatasource>();
+    final token = await secureStorage.getToken();
+    if (token == null) return; // Jangan kunci jika user sudah logout
+
+    final enabled = await secureStorage.getBiometricEnabled();
     if (enabled && mounted) {
       setState(() => _isLocked = true);
     }
@@ -94,7 +98,11 @@ class _DompetKampusAppState extends State<DompetKampusApp> with WidgetsBindingOb
   }
 
   Future<void> _checkAndLock() async {
-    final enabled = await di.sl<SecureStorageDatasource>().getBiometricEnabled();
+    final secureStorage = di.sl<SecureStorageDatasource>();
+    final token = await secureStorage.getToken();
+    if (token == null) return; // Jangan kunci jika user sudah logout
+
+    final enabled = await secureStorage.getBiometricEnabled();
     if (enabled && mounted) {
       setState(() => _isLocked = true);
     }
