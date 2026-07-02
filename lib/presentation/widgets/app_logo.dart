@@ -12,15 +12,19 @@ class AppLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     const fontFamily = 'PlusJakartaSans';
 
+    // Gunakan parameter size agar ukurannya dinamis, tapi kita kalikan
+    // faktor skala (misal 1.5) agar logo baru yang mungkin punya padding terlihat lebih besar
+    final double displaySize = size * 1.5;
+
     Widget icon = Image.asset(
-      'assets/images/logo-dompet.png',
-      width: size,
-      height: size,
+      'assets/icons/logoservicepay.png',
+      width: displaySize,
+      height: displaySize,
       fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) {
         return Container(
-          width: size,
-          height: size,
+          width: displaySize,
+          height: displaySize,
           decoration: BoxDecoration(
             color: AppColors.primary,
             borderRadius: BorderRadius.circular(size * 0.25),
