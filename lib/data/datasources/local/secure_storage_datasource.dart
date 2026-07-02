@@ -12,6 +12,17 @@ abstract class SecureStorageDatasource {
   Future<String?> getUserJson();
   Future<void> saveAuthVerified(bool verified);
   Future<bool> getAuthVerified();
+  Future<void> saveBiometricEnabled(bool enabled);
+  Future<bool> getBiometricEnabled();
+  Future<void> saveCredentials(String email, String password);
+  Future<({String email, String password})?> getCredentials();
+  Future<void> deleteCredentials();
+  Future<void> savePin(String pin);
+  Future<String?> getPin();
+  Future<void> saveFcmToken(String fcmToken);
+  Future<String?> getFcmToken();
+  Future<void> deleteFcmToken();
+  Future<void> deleteSession();
   Future<void> clearAll();
 }
 
@@ -72,6 +83,71 @@ class SecureStorageDatasourceImpl implements SecureStorageDatasource {
   Future<bool> getAuthVerified() async {
     final value = await _storage.read(key: AppConstants.kAuthVerified);
     return value == 'true';
+  }
+
+  @override
+  Future<void> saveBiometricEnabled(bool enabled) async {
+    await _storage.write(key: AppConstants.kBiometricEnabled, value: enabled.toString());
+  }
+
+  @override
+  Future<bool> getBiometricEnabled() async {
+    final value = await _storage.read(key: AppConstants.kBiometricEnabled);
+    return value == 'true';
+  }
+
+  @override
+  Future<void> savePin(String pin) async {
+    await _storage.write(key: AppConstants.kUserPin, value: pin);
+  }
+
+  @override
+  Future<String?> getPin() async {
+    return await _storage.read(key: AppConstants.kUserPin);
+  }
+
+  @override
+  Future<void> saveCredentials(String email, String password) async {
+    await _storage.write(key: AppConstants.kBiometricEmail, value: email);
+    await _storage.write(key: AppConstants.kBiometricPassword, value: password);
+  }
+
+  @override
+  Future<({String email, String password})?> getCredentials() async {
+    final email = await _storage.read(key: AppConstants.kBiometricEmail);
+    final password = await _storage.read(key: AppConstants.kBiometricPassword);
+    if (email != null && password != null) {
+      return (email: email, password: password);
+    }
+    return null;
+  }
+
+  @override
+  Future<void> deleteCredentials() async {
+    await _storage.delete(key: AppConstants.kBiometricEmail);
+    await _storage.delete(key: AppConstants.kBiometricPassword);
+  }
+
+  @override
+  Future<void> saveFcmToken(String fcmToken) async {
+    await _storage.write(key: AppConstants.kFcmToken, value: fcmToken);
+  }
+
+  @override
+  Future<String?> getFcmToken() async {
+    return await _storage.read(key: AppConstants.kFcmToken);
+  }
+
+  @override
+  Future<void> deleteFcmToken() async {
+    await _storage.delete(key: AppConstants.kFcmToken);
+  }
+
+  @override
+  Future<void> deleteSession() async {
+    await _storage.delete(key: AppConstants.kJwtToken);
+    await _storage.delete(key: AppConstants.kUserData);
+    await _storage.delete(key: AppConstants.kAuthVerified);
   }
 
   @override
