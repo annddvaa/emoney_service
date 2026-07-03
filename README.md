@@ -43,6 +43,7 @@
 - [Flow Integrasi Kedua Aplikasi](#-flow-integrasi-kedua-aplikasi)
 - [Struktur Folder](#-struktur-folder)
 - [Screenshot Aplikasi](#-screenshot-aplikasi)
+- [Video Presentasi](#-video-presentasi)
 - [Cara Menjalankan Project](#-cara-menjalankan-project)
 - [Lisensi](#-lisensi)
 
@@ -488,6 +489,20 @@ lib/
 </td>
 </tr>
 </table>
+
+---
+
+## 🎥 Video Presentasi
+
+<div align="center">
+
+[![Tonton Video Presentasi](https://img.shields.io/badge/YouTube-Tonton%20Video%20Presentasi-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/GANTI-DENGAN-ID-VIDEO)
+
+</div>
+
+Video ini berisi presentasi lengkap **Service Pay**, mulai dari penjelasan latar belakang, demo alur autentikasi (2FA & biometrik), transaksi (top-up, transfer, pembayaran QR), hingga integrasi *deep link* dengan merchant **DavPhone Service**.
+
+> ✏️ **Catatan:** Ganti tautan `https://youtu.be/GANTI-DENGAN-ID-VIDEO` di atas dengan link video YouTube kamu yang sebenarnya.
 
 ---
 
