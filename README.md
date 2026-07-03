@@ -496,7 +496,7 @@ lib/
 
 <div align="center">
 
-[![Tonton Video Presentasi](https://img.shields.io/badge/YouTube-Tonton%20Video%20Presentasi-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/GANTI-DENGAN-ID-VIDEO)
+[![Tonton Video Presentasi](https://img.shields.io/badge/YouTube-Tonton%20Video%20Presentasi-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/1mOkUh0BSwM?si=ahTFgtn-wwjjTRuO)
 
 </div>
 
