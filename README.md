@@ -502,7 +502,7 @@ lib/
 
 Video ini berisi presentasi lengkap **Service Pay**, mulai dari penjelasan latar belakang, demo alur autentikasi (2FA & biometrik), transaksi (top-up, transfer, pembayaran QR), hingga integrasi *deep link* dengan merchant **DavPhone Service**.
 
-> ✏️ **Catatan:** Ganti tautan `https://youtu.be/GANTI-DENGAN-ID-VIDEO` di atas dengan link video YouTube kamu yang sebenarnya.
+> ✏️ **Catatan:** Video ini dibuat dengan penuh perjuangan (dan kopi tengah malam), jadi mohon ditonton sampai habis ya, Pak/Bu 🙏😄.
 
 ---
 
